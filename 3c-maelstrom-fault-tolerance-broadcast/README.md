@@ -46,12 +46,7 @@ go func() {
 ## How to run
 
 ```bash
-# Build
-go build -o ~/go/bin/maelstrom-fault-tolerance-broadcast .
-
-# Test (run from the maelstrom/ directory)
-cd ../maelstrom
-./maelstrom test -w broadcast --bin ~/go/bin/maelstrom-fault-tolerance-broadcast --node-count 5 --time-limit 20 --rate 10 --nemesis partition
+make test
 ```
 
 ## Expected result

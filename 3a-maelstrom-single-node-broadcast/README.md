@@ -48,12 +48,7 @@ For 3a, only `Reply()` is needed. `Send()` and `RPC()` become important in 3b (m
 ## How to run
 
 ```bash
-# Build
-go build -o ~/go/bin/maelstrom-broadcast .
-
-# Test (run from the maelstrom/ directory)
-cd ../maelstrom
-./maelstrom test -w broadcast --bin ~/go/bin/maelstrom-broadcast --node-count 1 --time-limit 20 --rate 10
+make test
 ```
 
 ## Expected result

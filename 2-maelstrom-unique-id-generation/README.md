@@ -22,12 +22,7 @@ Node -> Client:  { "type": "generate_ok", "id": "550e8400-e29b-41d4-a716-4466554
 ## How to run
 
 ```bash
-# Build
-go build -o ~/go/bin/maelstrom-unique-ids .
-
-# Test (run from the maelstrom/ directory)
-cd ../maelstrom
-./maelstrom test -w unique-ids --bin ~/go/bin/maelstrom-unique-ids --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+make test
 ```
 
 Notable flags:

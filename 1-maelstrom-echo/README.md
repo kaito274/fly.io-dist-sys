@@ -23,12 +23,7 @@ Maelstrom ---(stdin)---> your binary ---(stdout)---> Maelstrom
 ## How to run
 
 ```bash
-# Build
-go build -o ~/go/bin/maelstrom-echo .
-
-# Test (run from the maelstrom/ directory)
-cd ../maelstrom
-./maelstrom test -w echo --bin ~/go/bin/maelstrom-echo --node-count 1 --time-limit 10
+make test
 ```
 
 ## Expected result
