@@ -58,12 +58,7 @@ Node      → Maelstrom: { "type": "topology_ok" }
 ## How to run
 
 ```bash
-# Build
-go build -o ~/go/bin/maelstrom-multi-node-broadcast .
-
-# Test (run from the maelstrom/ directory)
-cd ../maelstrom
-./maelstrom test -w broadcast --bin ~/go/bin/maelstrom-multi-node-broadcast --node-count 5 --time-limit 20 --rate 10
+make test
 ```
 
 ## Expected result
