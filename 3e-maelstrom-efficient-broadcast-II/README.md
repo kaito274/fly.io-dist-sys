@@ -4,7 +4,9 @@ https://fly.io/dist-sys/3e/
 
 ## What this does
 
-Same as 3d (batched all-to-all gossip), but with **tighter message-count targets** and **more relaxed latency targets**. The key is tuning the gossip ticker interval to hit the new sweet spot.
+Same as 3d (batched all-to-all gossip), but with **tighter message-count targets** and **more relaxed latency targets**. The key is tuning two knobs to hit the new sweet spot:
+- `WAIT_TIME = 500ms` (vs 300ms in 3d)
+- `BATCH_SIZE_LIMIT = 60` (vs 30 in 3d)
 
 ## What changed from 3d
 
@@ -14,9 +16,11 @@ Same as 3d (batched all-to-all gossip), but with **tighter message-count targets
 | Median latency | ≤ 400ms | ≤ 1000ms (relaxed) |
 | Max latency | ≤ 600ms | ≤ 2000ms (relaxed) |
 
-**The only code change:** ticker interval `300ms` → `500ms`.
+**Code changes:**
+- Ticker interval `300ms` → `500ms` — batches accumulate longer → fewer msgs-per-op
+- Batch size limit `30` → `60` — size-triggered early flush happens less often, reducing redundant sends
 
-A longer interval means more messages batch together before sending → fewer msgs-per-op. The latency increases slightly but stays well within the relaxed 1s/2s ceiling.
+Latency increases slightly but stays well within the relaxed 1s/2s ceiling.
 
 ## The trade-off
 
