@@ -15,8 +15,12 @@ func main() {
 
 	var messages []int
 
+	var neighbors []string
 	var pendingMessages []int
 	var mu sync.Mutex
+	const BATCH_SIZE_LIMIT = 60
+	const WAIT_TIME = 500
+	trigger := make(chan struct{}, 1)
 
 	n.Handle("broadcast", func(msg maelstrom.Message) error {
 		var body map[string]any
@@ -32,6 +36,12 @@ func main() {
 		if !isPresent {
 			messages = append(messages, messageValue)
 			pendingMessages = append(pendingMessages, messageValue)
+			if len(pendingMessages) >= BATCH_SIZE_LIMIT {
+				select {
+				case trigger <- struct{}{}: // signal to flush
+				default:
+				}
+			}
 		}
 		mu.Unlock()
 
@@ -54,6 +64,13 @@ func main() {
 		var body map[string]any
 		if err := json.Unmarshal(msg.Body, &body); err != nil {
 			return err
+		}
+
+		// save neighbors
+		topology := body["topology"].(map[string]any)
+		rawNeighbors := topology[n.ID()].([]any)
+		for _, v := range rawNeighbors {
+			neighbors = append(neighbors, v.(string))
 		}
 
 		body["type"] = "topology_ok"
@@ -79,32 +96,47 @@ func main() {
 			if !slices.Contains(messages, val) {
 				messages = append(messages, val)
 				pendingMessages = append(pendingMessages, val)
+				if len(pendingMessages) >= BATCH_SIZE_LIMIT {
+					select {
+					case trigger <- struct{}{}: // signal to flush
+					default:
+					}
+				}
 			}
 		}
 		mu.Unlock()
 		return nil
 	})
 
-	go func() {
-		ticker := time.NewTicker(500 * time.Millisecond)
-		for range ticker.C {
-			mu.Lock()
-			batch := pendingMessages
-			pendingMessages = nil
-			mu.Unlock()
-			if len(batch) == 0 {
-				continue
+	flush := func() {
+		mu.Lock()
+		batch := pendingMessages
+		pendingMessages = nil
+		mu.Unlock()
+		if len(batch) == 0 {
+			return
+		}
+		for _, peer := range n.NodeIDs() {
+			if peer == n.ID() {
+				continue // skip yourself
 			}
-			for _, peer := range n.NodeIDs() {
-				if peer == n.ID() {
-					continue // skip yourself
-				}
-				n.Send(peer, map[string]any{
-					"type":          "gossip",
-					"message-batch": batch,
-				})
-			}
+			n.Send(peer, map[string]any{
+				"type":          "gossip",
+				"message-batch": batch,
+			})
+		}
+	}
 
+	go func() {
+		ticker := time.NewTicker(WAIT_TIME * time.Millisecond)
+		for {
+			select {
+			case <-ticker.C:
+				flush()
+			case <-trigger:
+				ticker.Reset(WAIT_TIME * time.Millisecond)
+				flush()
+			}
 		}
 	}()
 
