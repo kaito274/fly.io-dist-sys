@@ -126,6 +126,10 @@ Anti-entropy and gossip protocols are classic distributed systems techniques.
 - **Cassandra Architecture – Anti-Entropy Repair**  
   https://cassandra.apache.org/doc/stable/cassandra/architecture/dynamo.html
 
+- **Eventual Consistency Anti Entropy**  
+  [https://cassandra.apache.org/doc/stable/cassandra/architecture/dynamo.html](https://www.influxdata.com/blog/eventual-consistency-anti-entropy/)
+
+
 ---
 
 ### One-Sentence Summary
